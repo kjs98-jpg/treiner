@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мастер общения: Социальное казначейство</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:rgba(17,24,39,.10);
+      --shadow: 0 14px 35px rgba(17,24,39,.10);
+
+      --accent:#2563eb;
+      --good:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(37,99,235,.08), transparent 60%),
+                  radial-gradient(900px 600px at 80% 0%, rgba(22,163,74,.06), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    header{
+      position: sticky;
+      top:0;
+      z-index:10;
+      background: rgba(246,247,251,.75);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 14px 16px; }
+
+    .top{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content: space-between;
+      align-items:flex-start;
+    }
+
+    h1{ margin:0; font-size:18px; letter-spacing:.2px; }
+    .sub{ color:var(--muted); font-size:13px; margin-top:3px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:8px 10px; border:1px solid var(--line);
+      border-radius:999px; background: rgba(255,255,255,.7);
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:750;
+      box-shadow: 0 1px 0 rgba(17,24,39,.03);
+      transition: transform .05s ease, background .15s ease;
+    }
+    .btn:hover{ background:#f9fafb; }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+      color:#fff;
+      border-color: rgba(37,99,235,.25);
+    }
+    .btn.ghost{
+      background: transparent;
+    }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+    main{ padding: 16px; }
+    .grid{
+      max-width: 1100px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: 0.95fr 1.55fr;
+      gap: 16px;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.88);
+      border:1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 14px;
+      border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+    }
+    .card .bd{ padding: 14px; }
+
+    /* Mood bar */
+    .moodWrap{ width: min(560px, 100%); }
+    .moodLine{
+      height: 14px;
+      border-radius: 999px;
+      background: linear-gradient(90deg,
+        #22c55e 0%,
+        #84cc16 20%,
+        #f59e0b 55%,
+        #f97316 75%,
+        #ef4444 100%
+      );
+      position: relative;
+      border:1px solid rgba(0,0,0,.08);
+      overflow:hidden;
+    }
+    .moodMarker{
+      position:absolute;
+      top: -6px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 10px solid rgba(17,24,39,.85);
+      transform: translateX(-50%);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
+    }
+    .moodMeta{
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-top:8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .moodState{
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* Portrait */
+    .portrait{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+      padding: 16px 10px 8px;
+    }
+    .avatar{
+      width: 180px;
+      height: 180px;
+      border-radius: 999px;
+      background: radial-gradient(120px 120px at 35% 30%, rgba(255,255,255,.9), rgba(255,255,255,.25)),
+                  linear-gradient(180deg, rgba(37,99,235,.08), rgba(22,163,74,.06));
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 18px 35px rgba(17,24,39,.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 92px;
+      user-select:none;
+    }
+    .who{
+      font-weight: 900;
+    }
+    .emo{
+      color: var(--muted);
+      font-size: 13px;
+      text-align:center;
+      max-width: 260px;
+      line-height:1.25;
+    }
+
+    /* Dialog */
+    .bubble{
+      border:1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px 12px;
+      line-height: 1.35;
+      font-size: 14px;
+    }
+    .bubble .label{
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .answers{
+      margin-top: 12px;
+      display:grid;
+      gap: 10px;
+    }
+    .ans{
+      text-align:left;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor:pointer;
+      transition: background .15s ease, border-color .15s ease, transform .05s ease;
+      font-weight: 750;
+    }
+    .ans:hover{
+      background: #f9fafb;
+      border-color: rgba(37,99,235,.25);
+    }
+    .ans:active{ transform: translateY(1px); }
+    .ans small{
+      display:block;
+      margin-top:6px;
+      font-weight:600;
+      color: var(--muted);
+    }
+
+    .kpis{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .kpis b{ color: var(--text); }
+
+    .footerRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      margin-top: 12px;
+    }
+
+    .toast{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px dashed rgba(0,0,0,.12);
+      background: rgba(37,99,235,.05);
+      color: rgba(17,24,39,.9);
+      font-size: 13px;
+      display:none;
+    }
+    .toast.show{ display:block; }
+    .good{ color: var(--good); font-weight: 900; }
+    .bad{ color: var(--bad); font-weight: 900; }
+    .muted{ color: var(--muted); }
+
+    /* modal */
+    .modal{
+      position: fixed;
+      inset: 0;
+      background: rgba(17,24,39,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal.open{ display:flex; }
+    .sheet{
+      width: min(720px, 100%);
+      background: #fff;
+      border:1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .sheet .hd{
+      padding: 14px;
+      border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; gap:12px; align-items:flex-start;
+    }
+    .sheet .bd{ padding: 14px; }
+    .x{
+      border:none; background: transparent; cursor:pointer;
+      font-size: 22px; line-height:1; padding: 4px 6px;
+    }
+
+    .field{ display:grid; gap:6px; margin:10px 0; }
+    input, select{
+      padding: 10px 12px;
+      border:1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      outline:none;
+      font-size: 14px;
+    }
+
+    .ttsRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .switch{
+      display:inline-flex; gap:8px; align-items:center;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      user-select:none;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Мастер общения: «Социальное казначейство»</h1>
+        <div class="sub" id="metaLine">Загрузка…</div>
+      </div>
+
+      <div class="pill">
+        <span id="whoPill">Оператор: —</span>
+        <button class="btn ghost" id="btnReset" title="Сбросить прогресс на этом устройстве">Сброс</button>
+      </div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+      <div class="moodWrap">
+        <div class="moodLine" aria-label="Шкала настроения">
+          <div class="moodMarker" id="moodMarker" style="left:70%"></div>
+        </div>
+        <div class="moodMeta">
+          <div>Настроение: <span class="moodState" id="moodState">Нейтральное</span> (<span id="moodNum">70</span>/100)</div>
+          <div class="muted">Зелёный — отлично • Красный — риск конфликта</div>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div>Шаг: <b id="kStep">1/6</b></div>
+        <div>Баллы: <b id="kScore">0</b></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <div>
+          <div style="font-weight:900;">Заявитель</div>
+          <div class="sub">Эмоция меняется в зависимости от ваших фраз</div>
+        </div>
+        <div class="ttsRow">
+          <span class="switch">
+            <input type="checkbox" id="ttsToggle" />
+            <label for="ttsToggle">Озвучка реплик</label>
+          </span>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="portrait">
+          <div class="avatar" id="avatar">😐</div>
+          <div class="who" id="applicantName">Ирина Ивановна</div>
+          <div class="emo" id="emotionHint">Нейтральная</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <div>
+          <div style="font-weight:900;" id="stepTitle">Диалог</div>
+          <div class="sub" id="stepGoal">Выберите лучший вариант по скрипту</div>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnRestart">Начать заново</button>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="bubble" id="bubble">
+          <div class="label" id="bubbleLabel">Заявитель</div>
+          <div id="bubbleText">Загрузка…</div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="toast" id="toast"></div>
+
+        <div class="footerRow">
+          <div class="muted" style="font-size:13px;" id="tipLine">
+            Подсказка: цель — вежливость, персонализация, верификация, удержание, контроль диалога, корректное завершение.
+          </div>
+          <button class="btn primary" id="btnNext" disabled>Дальше</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Modal: profile -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="hd">
+      <div>
+        <div style="font-weight:900;">Настройка тренажёра</div>
+        <div class="sub">Без регистрации. Данные сохраняются только на вашем устройстве.</div>
+      </div>
+      <button class="x" id="mClose" aria-label="Закрыть">×</button>
+    </div>
+    <div class="bd">
+      <div class="field">
+        <label class="sub">Имя оператора</label>
+        <input id="inOpName" placeholder="Например: Юля С." />
+      </div>
+      <div class="field">
+        <label class="sub">Фраза в приветствии (название КЦ)</label>
+        <input id="inOrg" value="социального казначейства города Москвы" />
+      </div>
+      <div class="field">
+        <label class="sub">Имя заявителя</label>
+        <input id="inApplicant" value="Ирина Ивановна" />
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+        <button class="btn primary" id="btnSaveProfile">Начать</button>
+        <button class="btn" id="btnClearLS">Сбросить всё</button>
+      </div>
+
+      <div class="sub" style="margin-top:10px;">
+        Примечание: кнопка «Озвучка реплик» использует SpeechSynthesis браузера (может быть недоступна в некоторых средах).
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LS_KEY = "sk_moscow_talktrainer_v1";
+
+  const $ = (id)=>document.getElementById(id);
+
+  // ====== data
+  const EMOJI_BY_MOOD = (m) => {
+    if (m >= 85) return { e:"😁", label:"Очень довольная" };
+    if (m >= 70) return { e:"😊", label:"Дружелюбная" };
+    if (m >= 50) return { e:"😐", label:"Нейтральная" };
+    if (m >= 30) return { e:"😟", label:"Нервничает" };
+    if (m >= 15) return { e:"😠", label:"Раздражена" };
+    return { e:"😡", label:"Сильно злится" };
+  };
+
+  const MOOD_STATE = (m) => {
+    if (m >= 85) return "Отличное";
+    if (m >= 70) return "Хорошее";
+    if (m >= 50) return "Нейтральное";
+    if (m >= 30) return "Напряжённое";
+    if (m >= 15) return "Плохое";
+    return "Критическое";
+  };
+
+  // 6 шагов как вы описали
+  const STEPS = [
+    {
+      key: "greet",
+      title: "Шаг 1 — Приветствие",
+      applicantLabel: "Заявитель",
+      applicantText: "Звонок в КЦ.",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          textTpl: "Здравствуйте, специалист {{org}} ({{op}}). Чем я могу вам помочь?",
+          score: +10, mood: +10,
+          note: "Стандарт приветствия + представление + предложение помощи."
+        },
+        {
+          label: "Вариант Б (ошибочный)",
+          text: "Алло, соц. казначейство, слушаю вас. Что у вас?",
+          score: -5, mood: -5,
+          note: "Слишком разговорно/сухо, нет правильного стандарта."
+        },
+        {
+          label: "Вариант В (хамство)",
+          text: "Да! Говорите быстрее, у нас очередь!",
+          score: -20, mood: -25,
+          note: "Эскалация конфликта, нарушение сервиса."
+        }
+      ]
+    },
+
+    {
+      key: "personalize",
+      title: "Шаг 2 — Персонализация (как обращаться)",
+      applicantLabel: "Заявитель",
+      applicantText: "У меня вопрос по выплатам на детей.",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          text: "Как я могу к вам обращаться?",
+          score: +10, mood: +10,
+          note: "Персонализация — обязательный шаг."
+        },
+        {
+          label: "Вариант Б (ошибочный)",
+          text: "Представьтесь, пожалуйста.",
+          score: -2, mood: -2,
+          note: "Формально и чуть холоднее, чем «как обращаться»."
+        },
+        {
+          label: "Вариант В (пропуск шага)",
+          text: "По какому именно пособию?",
+          score: -8, mood: -6,
+          note: "Нарушение последовательности: персонализация не выполнена."
+        }
+      ]
+    },
+
+    {
+      key: "verify",
+      title: "Шаг 3 — Верификация (СНИЛС)",
+      applicantLabel: "Заявитель",
+      applicantText: "Меня зовут Ирина Ивановна. Почему мне не пришли деньги за август?",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          textTpl: "{{name}}, для предоставления более детальной информации необходимо подтвердить вашу личность. Для этого потребуется СНИЛС или серия и номер паспорта. Назовите, пожалуйста.",
+          score: +15, mood: +10,
+          note: "Вежливо, объясняет причину, предлагает варианты."
+        },
+        {
+          label: "Вариант Б (ошибочный)",
+          text: "Дайте ваш СНИЛС, сейчас посмотрю.",
+          score: -5, mood: -6,
+          note: "Слишком резко, без объяснения."
+        }
+      ]
+    },
+
+    {
+      key: "hold",
+      title: "Шаг 4 — Удержание (hold)",
+      applicantLabel: "Заявитель",
+      applicantText: "Да, СНИЛС [называет цифры]. Посмотрите скорее!",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          textTpl: "{{name}}, оставайтесь, пожалуйста, на линии, я уточню информацию.",
+          score: +10, mood: +6,
+          note: "Правильное удержание, вежливо."
+        },
+        {
+          label: "Вариант Б (хамство)",
+          text: "Ждите. Я не могу так быстро.",
+          score: -15, mood: -18,
+          note: "Усиливает напряжение."
+        }
+      ]
+    },
+
+    {
+      key: "clarify",
+      title: "Шаг 5 — Работа с уточнением",
+      applicantLabel: "Заявитель",
+      applicantText: "Вы там долго еще?",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          textTpl: "{{name}}, спасибо за ожидание. Мне потребуется еще некоторое время для уточнения информации. Оставайтесь, пожалуйста, на линии.",
+          score: +10, mood: +10,
+          note: "Подтверждение ожидания + благодарность + корректное удержание."
+        },
+        {
+          label: "Вариант Б (ошибочный)",
+          text: "Я же сказала ждать, я еще смотрю!",
+          score: -20, mood: -25,
+          note: "Конфликтная формулировка."
+        }
+      ]
+    },
+
+    {
+      key: "finish",
+      title: "Шаг 6 — Завершение",
+      applicantLabel: "Заявитель",
+      applicantText: "Спасибо, теперь понятно.",
+      options: [
+        {
+          label: "Вариант А (верный)",
+          textTpl: "{{name}}, я могу вам еще чем-то помочь? (после ответа) Спасибо за звонок, до свидания. Буду благодарна, если вы оцените мою работу.",
+          score: +15, mood: +10,
+          note: "Корректное завершение + доп. помощь + просьба об оценке."
+        },
+        {
+          label: "Вариант Б (ошибочный)",
+          text: "Ну всё, до свидания.",
+          score: -10, mood: -10,
+          note: "Не соблюден стандарт вежливости/сервиса."
+        }
+      ]
+    },
+  ];
+
+  // ====== state
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function saveState(s){
+    localStorage.setItem(LS_KEY, JSON.stringify(s));
+  }
+  function defaultState(){
+    return {
+      profile: { op:"", org:"социального казначейства города Москвы", applicant:"Ирина Ивановна" },
+      stepIndex: 0,
+      score: 0,
+      mood: 70,
+      lastPick: null,
+      finished: false,
+      tts: false,
+    };
+  }
+
+  let state = loadState() || defaultState();
+
+  // ====== helpers
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+  function applyTpl(str){
+    const p = state.profile;
+    return (str || "")
+      .replaceAll("{{op}}", p.op || "Оператор")
+      .replaceAll("{{org}}", p.org || "КЦ")
+      .replaceAll("{{name}}", p.applicant || "Заявитель");
+  }
+
+  function speak(text){
+    if(!state.tts) return;
+    try{
+      if(!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ru-RU";
+      u.rate = 1.03;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  // ====== render
+  function renderHeader(){
+    $("whoPill").textContent = state.profile.op ? `Оператор: ${state.profile.op}` : "Оператор: —";
+
+    $("kScore").textContent = String(state.score);
+    $("kStep").textContent = `${Math.min(state.stepIndex+1, STEPS.length)}/${STEPS.length}`;
+
+    const m = clamp(state.mood, 0, 100);
+    $("moodNum").textContent = String(m);
+    $("moodState").textContent = MOOD_STATE(m);
+    $("moodMarker").style.left = m + "%";
+
+    $("metaLine").textContent = state.finished
+      ? "Диалог завершён. Можно начать заново или улучшить результат."
+      : "Выберите лучший вариант ответа по скрипту.";
+  }
+
+  function renderPortrait(){
+    const m = clamp(state.mood, 0, 100);
+    const emo = EMOJI_BY_MOOD(m);
+    $("avatar").textContent = emo.e;
+    $("emotionHint").textContent = emo.label;
+    $("applicantName").textContent = state.profile.applicant || "Заявитель";
+  }
+
+  function renderStep(){
+    const i = state.stepIndex;
+    const step = STEPS[i];
+
+    if(state.finished){
+      $("stepTitle").textContent = "Результат";
+      $("stepGoal").textContent = "Итог и рекомендации";
+
+      const m = clamp(state.mood, 0, 100);
+      const quality =
+        state.score >= 45 ? "Отлично: высокий стандарт сервиса" :
+        state.score >= 25 ? "Хорошо: есть точки улучшения" :
+        state.score >= 5  ? "Слабо: риск жалоб/эскалации" :
+                            "Критично: нужен разбор";
+
+      $("bubbleLabel").textContent = "Итог";
+      $("bubbleText").innerHTML = `
+        <div style="font-weight:900; font-size:16px; margin-bottom:6px;">${quality}</div>
+        <div class="muted">Баллы: <b style="color:var(--text)">${state.score}</b> • Настроение: <b style="color:var(--text)">${m}/100</b></div>
+        <div style="margin-top:10px;">
+          <div style="font-weight:800;">Мини-рекомендации:</div>
+          <ul class="muted" style="margin:6px 0 0 18px; padding:0;">
+            <li>Держите структуру: приветствие → персонализация → верификация → удержание → уточнение → завершение.</li>
+            <li>Поясняйте «зачем» просите данные (СНИЛС/паспорт), говорите мягко.</li>
+            <li>На «Вы там долго?» отвечайте благодарностью за ожидание + таймингом.</li>
+            <li>Всегда завершайте: «Могу ли помочь ещё?» + «Спасибо за звонок» + корректное прощание.</li>
+          </ul>
+        </div>
+      `;
+
+      $("answers").innerHTML = "";
+      $("btnNext").disabled = true;
+      return;
+    }
+
+    $("stepTitle").textContent = step.title;
+    $("stepGoal").textContent = "Выберите лучший вариант ответа по скрипту";
+
+    $("bubbleLabel").textContent = step.applicantLabel || "Заявитель";
+    $("bubbleText").textContent = step.applicantText;
+
+    const box = $("answers");
+    box.innerHTML = "";
+    $("btnNext").disabled = true;
+    state.lastPick = null;
+
+    step.options.forEach((opt, idx)=>{
+      const b = document.createElement("button");
+      b.className = "ans";
+      const text = applyTpl(opt.textTpl || opt.text || "");
+      b.innerHTML = `
+        ${escapeHtml(opt.label)}: ${escapeHtml(text)}
+        <small>${escapeHtml(opt.note || "")}</small>
+      `;
+      b.addEventListener("click", ()=>{
+        pickOption(idx);
+      });
+      box.appendChild(b);
+    });
+
+    $("toast").classList.remove("show");
+    speak(step.applicantText);
+  }
+
+  function escapeHtml(s){
+    return (s ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // ====== actions
+  function pickOption(optIndex){
+    const step = STEPS[state.stepIndex];
+    const opt = step.options[optIndex];
+    const text = applyTpl(opt.textTpl || opt.text || "");
+
+    state.score += Number(opt.score || 0);
+    state.mood = clamp(state.mood + Number(opt.mood || 0), 0, 100);
+    state.lastPick = { stepKey: step.key, optIndex, text, score: opt.score, mood: opt.mood };
+    saveState(state);
+
+    const toast = $("toast");
+    const scoreStr = (opt.score >= 0 ? `+${opt.score}` : `${opt.score}`);
+    const moodStr  = (opt.mood  >= 0 ? `+${opt.mood}`  : `${opt.mood}`);
+
+    toast.innerHTML = `
+      <div style="font-weight:900;">
+        ${opt.score >= 0 ? `<span class="good">Верный/удачный ход</span>` : `<span class="bad">Нужно лучше</span>`}
+      </div>
+      <div class="muted" style="margin-top:6px;">
+        Баллы: <b style="color:var(--text)">${scoreStr}</b> • Настроение: <b style="color:var(--text)">${moodStr}</b>
+      </div>
+      <div class="muted" style="margin-top:6px;">${escapeHtml(opt.note || "")}</div>
+    `;
+    toast.classList.add("show");
+
+    renderHeader();
+    renderPortrait();
+
+    // блокируем повторный выбор: делаем кнопки disabled
+    [...document.querySelectorAll(".ans")].forEach(btn => btn.disabled = true);
+
+    // озвучка ответа оператора
+    speak(text);
+
+    $("btnNext").disabled = false;
+  }
+
+  function nextStep(){
+    if(state.finished) return;
+
+    if(state.stepIndex < STEPS.length - 1){
+      state.stepIndex += 1;
+    } else {
+      state.finished = true;
+    }
+    saveState(state);
+    renderAll();
+  }
+
+  function restart(){
+    state.stepIndex = 0;
+    state.score = 0;
+    state.mood = 70;
+    state.lastPick = null;
+    state.finished = false;
+    saveState(state);
+    renderAll();
+  }
+
+  function resetAll(){
+    localStorage.removeItem(LS_KEY);
+    state = defaultState();
+    renderAll();
+    openProfile();
+  }
+
+  // ====== modal profile
+  const modal = $("modal");
+  function openProfile(){
+    $("inOpName").value = state.profile.op || "";
+    $("inOrg").value = state.profile.org || "социального казначейства города Москвы";
+    $("inApplicant").value = state.profile.applicant || "Ирина Ивановна";
+    modal.classList.add("open");
+  }
+  function closeProfile(){
+    modal.classList.remove("open");
+  }
+
+  $("mClose").addEventListener("click", closeProfile);
+
+  $("btnSaveProfile").addEventListener("click", ()=>{
+    const op = $("inOpName").value.trim();
+    const org = $("inOrg").value.trim();
+    const applicant = $("inApplicant").value.trim();
+
+    if(!op){ alert("Введите имя оператора."); return; }
+    if(!org){ alert("Введите название (фразу) КЦ."); return; }
+    if(!applicant){ alert("Введите имя заявителя."); return; }
+
+    state.profile = { op, org, applicant };
+    saveState(state);
+    closeProfile();
+    renderAll();
+  });
+
+  $("btnClearLS").addEventListener("click", ()=>{
+    if(confirm("Сбросить всё (профиль и прогресс) на этом устройстве?")){
+      resetAll();
+    }
+  });
+
+  // ====== UI events
+  $("btnNext").addEventListener("click", nextStep);
+  $("btnRestart").addEventListener("click", restart);
+  $("btnReset").addEventListener("click", ()=>{
+    if(confirm("Сбросить прогресс на этом устройстве?")) restart();
+  });
+
+  $("ttsToggle").addEventListener("change", (e)=>{
+    state.tts = !!e.target.checked;
+    saveState(state);
+  });
+
+  // ====== init
+  function renderAll(){
+    $("ttsToggle").checked = !!state.tts;
+    renderHeader();
+    renderPortrait();
+    renderStep();
+  }
+
+  renderAll();
+  if(!state.profile.op) openProfile();
+</script>
+</body>
+</html>
