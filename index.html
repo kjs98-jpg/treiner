@@ -15,10 +15,8 @@
 
       --accent:#2563eb;
       --good:#16a34a;
-      --warn:#f59e0b;
       --bad:#ef4444;
     }
-
     *{ box-sizing:border-box; }
     body{
       margin:0;
@@ -28,7 +26,6 @@
                   var(--bg);
       color:var(--text);
     }
-
     header{
       position: sticky;
       top:0;
@@ -37,9 +34,7 @@
       backdrop-filter: blur(8px);
       border-bottom:1px solid var(--line);
     }
-
     .wrap{ max-width: 1100px; margin: 0 auto; padding: 14px 16px; }
-
     .top{
       display:flex;
       gap:12px;
@@ -47,7 +42,6 @@
       justify-content: space-between;
       align-items:flex-start;
     }
-
     h1{ margin:0; font-size:18px; letter-spacing:.2px; }
     .sub{ color:var(--muted); font-size:13px; margin-top:3px; }
 
@@ -77,6 +71,27 @@
       border-color: rgba(37,99,235,.25);
     }
     .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+    .btn.tiny{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+    }
+
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:#fff;
+      color: var(--muted);
+      font-size: 13px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .switch input{ width:16px; height:16px; }
 
     main{ padding: 16px; }
     .grid{
@@ -138,14 +153,8 @@
       font-size: 12px;
       align-items:center;
     }
-    .moodState{
-      font-weight: 900;
-      color: var(--text);
-    }
-    .moodEnds{
-      display:flex; gap:8px; align-items:center;
-      color: var(--muted);
-    }
+    .moodState{ font-weight: 900; color: var(--text); }
+    .moodEnds{ display:flex; gap:8px; align-items:center; color: var(--muted); }
     .dot{ width:8px; height:8px; border-radius:99px; display:inline-block; }
     .dot.g{ background:#22c55e; }
     .dot.r{ background:#ef4444; }
@@ -190,11 +199,19 @@
       line-height: 1.35;
       font-size: 14px;
     }
+    .labelRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 6px;
+    }
     .bubble .label{
       color: var(--muted);
       font-size: 12px;
-      margin-bottom: 6px;
+      margin:0;
     }
+
     .answers{
       margin-top: 12px;
       display:grid;
@@ -249,6 +266,22 @@
     .toast.show{ display:block; }
     .good{ color: var(--good); font-weight: 900; }
     .bad{ color: var(--bad); font-weight: 900; }
+    .muted{ color: var(--muted); }
+
+    .rec{
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+    ul{ margin: 6px 0 0 18px; padding: 0; }
+    code.inline{
+      background: rgba(17,24,39,.06);
+      border: 1px solid rgba(17,24,39,.08);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+    }
 
     /* modal */
     .modal{
@@ -299,7 +332,7 @@
     <div class="top">
       <div>
         <h1>Мастер общения: «Социальное казначейство»</h1>
-        <div class="sub" id="metaLine"> </div>
+        <div class="sub" id="metaLine"></div>
       </div>
 
       <div class="pill">
@@ -339,7 +372,10 @@
           <div style="font-weight:900;">Заявитель</div>
           <div class="sub">Эмоция меняется от ваших формулировок</div>
         </div>
-        <div></div>
+        <label class="switch">
+          <input type="checkbox" id="ttsApplicantToggle" />
+          Озвучка заявителя
+        </label>
       </div>
       <div class="bd">
         <div class="portrait">
@@ -354,7 +390,7 @@
       <div class="hd">
         <div>
           <div style="font-weight:900;" id="stepTitle">Диалог</div>
-          <div class="sub" id="stepGoal"> </div>
+          <div class="sub" id="stepGoal"></div>
         </div>
         <div class="row">
           <button class="btn" id="btnRestart">Начать заново</button>
@@ -363,7 +399,10 @@
 
       <div class="bd">
         <div class="bubble" id="bubble">
-          <div class="label" id="bubbleLabel">Заявитель</div>
+          <div class="labelRow">
+            <div class="label" id="bubbleLabel">Заявитель</div>
+            <button class="btn tiny" id="btnReplay" type="button">Повторить</button>
+          </div>
           <div id="bubbleText">Загрузка…</div>
         </div>
 
@@ -417,7 +456,7 @@
     APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzFQr6Ir0D2j6ZgzgHKKZxcunp3_6fI5QDBNfSNW_eNwVZK6Le05ZOcxt2Ame0Yqp55SA/exec"
   };
 
-  const LS_KEY = "sk_moscow_talktrainer_v2";
+  const LS_KEY = "sk_moscow_talktrainer_v4";
   const $ = (id)=>document.getElementById(id);
 
   function jsonp(url){
@@ -458,7 +497,6 @@
     return "Критическое";
   };
 
-  // 6 шагов
   const STEPS = [
     {
       key: "greet",
@@ -545,6 +583,7 @@
       lastPick: null,
       finished: false,
 
+      ttsApplicant: false,
       playerId: newId("pid"),
       runId: "",
       startedAtISO: "",
@@ -556,6 +595,7 @@
   }
 
   let state = loadState() || defaultState();
+  if(typeof state.ttsApplicant !== "boolean") state.ttsApplicant = false;
 
   function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
 
@@ -577,10 +617,107 @@
   }
 
   function moodMarkerLeft(mood0_100){
-    // ВАЖНО: зелёный слева, красный справа.
-    // mood = 100 (очень хорошо) => маркер слева (0%)
-    // mood = 0 (очень плохо)   => маркер справа (100%)
+    // зелёный слева, красный справа
     return (100 - clamp(mood0_100, 0, 100));
+  }
+
+  function formatSec(sec){
+    sec = Number(sec||0);
+    const m = Math.floor(sec/60);
+    const s = sec%60;
+    if(m <= 0) return `${s}с`;
+    return `${m}м ${String(s).padStart(2,"0")}с`;
+  }
+
+  let currentApplicantText = "";
+
+  function speakApplicant(text){
+    if(!state.ttsApplicant) return;
+    if(!text) return;
+    if(!("speechSynthesis" in window)) return;
+
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ru-RU";
+      u.rate = 1.02;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function qualityLabel(){
+    // комбинируем баллы и финальное настроение
+    const s = state.score;
+    const m = clamp(state.mood, 0, 100);
+    if(s >= 45 && m >= 70) return "Отлично: высокий стандарт сервиса";
+    if(s >= 25 && m >= 50) return "Хорошо: в целом корректно, есть точки роста";
+    if(s >= 5) return "Нужно улучшить: есть риск эскалации/жалобы";
+    return "Критично: требуется разбор формулировок";
+  }
+
+  function stepLetter(idx){
+    return ["А","Б","В","Г","Д"][idx] || String(idx+1);
+  }
+
+  function bestReplyForStep(step){
+    // лучший вариант: максимальные баллы, при равенстве — максимальный mood
+    const best = step.options.reduce((a,b)=>{
+      const as = Number(a.score||0), bs = Number(b.score||0);
+      if(bs !== as) return (bs > as) ? b : a;
+      const am = Number(a.mood||0), bm = Number(b.mood||0);
+      return (bm > am) ? b : a;
+    });
+    return applyTpl(best.textTpl || best.text || "");
+  }
+
+  function buildRecommendationsHTML(){
+    const weak = (state.log || []).filter(x => (Number(x.scoreDelta||0) < 0) || (Number(x.moodDelta||0) < 0));
+    const byKey = new Map((state.log || []).map(x => [x.stepKey, x]));
+
+    let html = `<div class="rec">`;
+
+    if(weak.length === 0){
+      html += `
+        <div style="font-weight:900; margin-bottom:6px;">Рекомендации</div>
+        <div class="muted">Ошибок по шагам не обнаружено. Сохраните структуру и темп, это сильная сессия.</div>
+      `;
+      html += `</div>`;
+      return html;
+    }
+
+    html += `<div style="font-weight:900; margin-bottom:6px;">Рекомендации по шагам</div>`;
+    html += `<ul class="muted">`;
+
+    for(const step of STEPS){
+      const log = byKey.get(step.key);
+      if(!log) continue;
+      const bad = (Number(log.scoreDelta||0) < 0) || (Number(log.moodDelta||0) < 0);
+      if(!bad) continue;
+
+      const best = bestReplyForStep(step);
+      html += `
+        <li style="margin-bottom:8px;">
+          <b style="color:var(--text)">${escapeHtml(step.title)}</b> — попробуйте формулировку ближе к стандарту:<br>
+          <span class="muted">«${escapeHtml(best)}»</span>
+        </li>
+      `;
+    }
+    html += `</ul>`;
+
+    html += `
+      <div style="margin-top:10px;">
+        <div style="font-weight:900; margin-bottom:6px;">Общие принципы</div>
+        <ul class="muted">
+          <li>Держите последовательность: приветствие → персонализация → верификация → удержание → уточнение → завершение.</li>
+          <li>На просьбу подождать: благодарность за ожидание + объяснение + просьба оставаться на линии.</li>
+          <li>При запросе данных: объясните «зачем» и предложите варианты (СНИЛС или паспорт).</li>
+          <li>Завершение: «Могу помочь ещё?» + «Спасибо за звонок» + корректное прощание.</li>
+        </ul>
+      </div>
+    `;
+
+    html += `</div>`;
+    return html;
   }
 
   function renderHeader(){
@@ -593,9 +730,8 @@
     $("moodState").textContent = MOOD_STATE(m);
     $("moodMarker").style.left = moodMarkerLeft(m) + "%";
 
-    $("metaLine").textContent = state.finished
-      ? "Диалог завершён."
-      : "";
+    $("metaLine").textContent = state.finished ? "Диалог завершён." : "";
+    $("ttsApplicantToggle").checked = !!state.ttsApplicant;
   }
 
   function renderPortrait(){
@@ -607,29 +743,49 @@
   }
 
   function renderStep(){
+    const toast = $("toast");
+
     if(state.finished){
       $("stepTitle").textContent = "Итог";
       $("stepGoal").textContent = "";
 
       const m = clamp(state.mood, 0, 100);
-      const quality =
-        state.score >= 45 ? "Отлично" :
-        state.score >= 25 ? "Хорошо" :
-        state.score >= 5  ? "Нужно улучшить" :
-                            "Критично";
+      const q = qualityLabel();
+
+      // мини-результаты по шагам
+      const rows = (state.log || []).map((x, i)=>{
+        const step = STEPS.find(s=>s.key===x.stepKey);
+        const title = step ? step.title : `Шаг ${i+1}`;
+        const letter = stepLetter(Number(x.optIndex||0));
+        const sd = Number(x.scoreDelta||0);
+        const md = Number(x.moodDelta||0);
+        const sdStr = (sd>=0?`+${sd}`:`${sd}`);
+        const mdStr = (md>=0?`+${md}`:`${md}`);
+        return `<li><span style="color:var(--text); font-weight:800;">${escapeHtml(title)}</span> — вариант ${letter}: баллы ${sdStr}, настроение ${mdStr}</li>`;
+      }).join("");
 
       $("bubbleLabel").textContent = "Результат";
       $("bubbleText").innerHTML = `
-        <div style="font-weight:900; font-size:16px; margin-bottom:6px;">${quality}</div>
-        <div style="color:var(--muted)">
+        <div style="font-weight:900; font-size:16px; margin-bottom:6px;">${escapeHtml(q)}</div>
+        <div class="muted">
           Баллы: <b style="color:var(--text)">${state.score}</b> •
           Настроение: <b style="color:var(--text)">${m}/100</b> •
           Время: <b style="color:var(--text)">${formatSec(state.durationSec || 0)}</b>
         </div>
+
+        <div class="rec">
+          <div style="font-weight:900; margin-bottom:6px;">Ваши шаги</div>
+          <ul class="muted">${rows || "<li>Нет данных по шагам</li>"}</ul>
+        </div>
+
+        ${buildRecommendationsHTML()}
       `;
 
+      currentApplicantText = "";
+      $("btnReplay").style.display = "none";
+
       $("answers").innerHTML = "";
-      $("toast").classList.remove("show");
+      toast.classList.remove("show");
 
       $("btnNext").style.display = "none";
       $("btnSubmit").style.display = "inline-block";
@@ -644,6 +800,9 @@
 
     $("bubbleLabel").textContent = step.applicantLabel || "Заявитель";
     $("bubbleText").textContent = step.applicantText;
+
+    currentApplicantText = step.applicantText || "";
+    $("btnReplay").style.display = "inline-flex";
 
     const box = $("answers");
     box.innerHTML = "";
@@ -662,21 +821,25 @@
       box.appendChild(b);
     });
 
-    $("toast").classList.remove("show");
+    toast.classList.remove("show");
+
+    // авто-озвучка реплики заявителя
+    speakApplicant(currentApplicantText);
   }
 
   function pickOption(optIndex){
     const step = STEPS[state.stepIndex];
     const opt = step.options[optIndex];
-    const text = applyTpl(opt.textTpl || opt.text || "");
+    const chosenText = applyTpl(opt.textTpl || opt.text || "");
 
     state.score += Number(opt.score || 0);
     state.mood = clamp(state.mood + Number(opt.mood || 0), 0, 100);
 
     state.log.push({
       stepKey: step.key,
+      stepTitle: step.title,
       optIndex,
-      text,
+      chosenText,
       scoreDelta: Number(opt.score || 0),
       moodDelta: Number(opt.mood || 0),
       atISO: new Date().toISOString()
@@ -685,18 +848,16 @@
     state.lastPick = { stepKey: step.key, optIndex };
     saveState(state);
 
-    const toast = $("toast");
     const scoreStr = (opt.score >= 0 ? `+${opt.score}` : `${opt.score}`);
     const moodStr  = (opt.mood  >= 0 ? `+${opt.mood}`  : `${opt.mood}`);
 
+    const toast = $("toast");
     toast.innerHTML = `
-      <div style="font-weight:900;">
-        ${opt.score >= 0 ? `<span class="good">Хороший ответ</span>` : `<span class="bad">Плохая формулировка</span>`}
-      </div>
-      <div style="color:var(--muted); margin-top:6px;">
+      <div style="font-weight:900;">Результат шага</div>
+      <div class="muted" style="margin-top:6px;">
         Баллы: <b style="color:var(--text)">${scoreStr}</b> • Настроение: <b style="color:var(--text)">${moodStr}</b>
       </div>
-      <div style="color:var(--muted); margin-top:6px;">${escapeHtml(opt.note || "")}</div>
+      <div class="muted" style="margin-top:6px;">${escapeHtml(opt.note || "")}</div>
     `;
     toast.classList.add("show");
 
@@ -746,14 +907,6 @@
     state = defaultState();
     renderAll();
     openProfile();
-  }
-
-  function formatSec(sec){
-    sec = Number(sec||0);
-    const m = Math.floor(sec/60);
-    const s = sec%60;
-    if(m <= 0) return `${s}с`;
-    return `${m}м ${String(s).padStart(2,"0")}с`;
   }
 
   async function submitResult(){
@@ -823,7 +976,7 @@
     state.profile = { op, org, applicant };
     saveState(state);
     closeProfile();
-    restart(); // старт новой сессии
+    restart(); // старт новой сессии (и озвучка начнёт работать после клика)
   });
 
   $("btnClearLS").addEventListener("click", ()=>{
@@ -838,17 +991,28 @@
   });
   $("btnSubmit").addEventListener("click", submitResult);
 
+  $("ttsApplicantToggle").addEventListener("change", (e)=>{
+    state.ttsApplicant = !!e.target.checked;
+    saveState(state);
+    if(state.ttsApplicant && currentApplicantText) speakApplicant(currentApplicantText);
+  });
+
+  $("btnReplay").addEventListener("click", ()=>{
+    speakApplicant(currentApplicantText);
+  });
+
   function renderAll(){
+    if(!state.runId) state.runId = newId("run");
+    if(!state.startedAtISO) state.startedAtISO = new Date().toISOString();
+    saveState(state);
+
     renderHeader();
     renderPortrait();
     renderStep();
   }
 
-  // init
   renderAll();
   if(!state.profile.op) openProfile();
-  // если вдруг runId не задан (старое состояние) — зададим
-  if(!state.runId || !state.startedAtISO) restart();
 </script>
 </body>
 </html>
